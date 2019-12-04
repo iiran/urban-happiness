@@ -1,0 +1,18 @@
+{
+  "NAKAMADB_DEVELOP": {
+    "dialect": "postgres",
+    "host": "1.2.3.4",
+    "port": "5432",
+    "user": "sdfsdf",
+    "password": "dsfdsf",
+    "database": "sdfsdf"
+  },
+  "STATDB_DEVELOP": {
+    "dialect": "postgres",
+    "host": "5.6.7.8",
+    "port": "5432",
+    "user": "wfwefwf",
+    "password": "wefwef",
+    "database": "wefwefwefwe"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "sites": [
+    {
+      "org": "apple",
+      "urls": [
+        "apple.com",
+        "icloud.com"
+      ]
+    },{
+      "org": "qq",
+      "urls": [
+        "qq.com"
+      ]
+    },{
+      "org": "netease",
+      "urls": [
+        "163.com"
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "tag": "test account",
+      "org": "apple",
+      "username": "hello",
+      "password": "world"
+    },
+    {
+      "tag": "test account3",
+      "org": "apple",
+      "username": "hello3",
+      "password": "world3"
+    },
+    {
+      "tag": "test account2",
+      "org": "netease",
+      "username": "hello2",
+      "password": "world2"
+    }
+  ]
+}

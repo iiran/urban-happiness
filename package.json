@@ -1,0 +1,25 @@
+{
+  "name": "nsh",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "scripts": {
+    "clean": "ts-node tools/cleanDist",
+    "build": "npm run clean && tsc",
+    "prestart": "npm run build",
+    "start": "node ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^12.12.14",
+    "@types/shelljs": "^0.8.6",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.2"
+  },
+  "dependencies": {
+    "shelljs": "^0.8.3",
+    "sqlite3": "^4.1.0"
+  }
+}
