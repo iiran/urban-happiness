@@ -3,4 +3,5 @@ conf/*.json
 .idea/
 node_modules/
 dist/
-runtime/
+runtime/cmd.sh
+store/*.json

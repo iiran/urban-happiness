@@ -1,13 +1,9 @@
-import * as cmd from './cmd'
+import { Nsh, defaultPlugins } from './cmd'
 
-function main() {
-  cmd.getAllAccounts().then(() => {
-    //console.log(a)
-  }).then(()=> {
-    cmd.fetchSiteAccounts('icloud.com').then(v=>{
-      console.log(v)
-    })
-  })
+async function main() {
+  const nsh = new Nsh(defaultPlugins, { storePath: `store/`, runtimePath: `runtime/` })
+  nsh.selectCommand()
+  await nsh.execCommand()
 }
 
 main()

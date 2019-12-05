@@ -6,20 +6,22 @@
   "scripts": {
     "clean": "ts-node tools/cleanDist",
     "build": "npm run clean && tsc",
-    "prestart": "npm run build",
-    "start": "node ."
+    "start": "node . && runtime/cmd.sh",
+    "test": "ts-node test/test",
+    "init": "ts-node tools/initStore"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^12.12.14",
+    "@types/readline-sync": "^1.4.3",
     "@types/shelljs": "^0.8.6",
     "ts-node": "^8.5.4",
     "typescript": "^3.7.2"
   },
   "dependencies": {
-    "shelljs": "^0.8.3",
-    "sqlite3": "^4.1.0"
+    "readline-sync": "^1.4.10",
+    "shelljs": "^0.8.3"
   }
 }
