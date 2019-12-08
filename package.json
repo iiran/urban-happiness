@@ -7,8 +7,7 @@
     "clean": "ts-node tools/cleanDist",
     "build": "npm run clean && tsc",
     "start": "node . && runtime/cmd.sh",
-    "test": "ts-node test/test",
-    "init": "ts-node tools/initStore"
+    "test": "ts-node test/test"
   },
   "keywords": [],
   "author": "",

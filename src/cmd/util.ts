@@ -6,6 +6,7 @@ import * as Shell from 'shelljs'
 export const c_comma = ','
 export const c_space = ' '
 export const c_dot = '.'
+export const c_single_quote = `'`
 
 // printSelection - 
 // print an array like:
@@ -216,10 +217,46 @@ export const ArrayEqual = <T>(a1: Array<T>, a2: Array<T>): boolean => {
   return true
 }
 
+export const splitWithEx = (i: string, split: string, except: string): string[] => {
+  i = i.trim()
+
+  let inEx = false
+  let res: string[] = []
+  let thisBlock = ''
+
+  for (const c of i) {
+
+    if (inEx) {
+      if (c === except) {
+        inEx = false
+        res.push(thisBlock)
+        thisBlock = ''
+      } else {
+        thisBlock += c
+      }
+    } else {
+      if (c === except) {
+        inEx = true
+      } else if (c !== split) {
+        thisBlock += c
+      } else {
+        res.push(thisBlock)
+        thisBlock = ''
+      }
+    }
+  }
+  if (thisBlock !== '') {
+    res.push(thisBlock)
+    thisBlock = ''
+  }
+  return res
+}
+
 // eatRedundantSpace
 // example: 
-// '      s           a              w        '   -> 's a w'
-export const eatRedundantSpace = (origin: string): string => {
+// `      s           a              w        `   -> 's a w'
+// `      s    a       w   ' w   b '` -> `s a w ' w   b '`
+export const eatRedundantSpace = (origin: string, except: string[] = []): string => {
   origin = origin.trim()
 
   if (origin.length === 0)
@@ -227,18 +264,40 @@ export const eatRedundantSpace = (origin: string): string => {
 
   let res = ''
   let topIsSpace = false
+  let inblock = false
+  let c_inblock = ''
+
   for (let i = 0; i < origin.length; i++) {
-    if (origin[i] !== c_space) {
-      res += origin[i]
-      topIsSpace = false
-    } else /* origin[i] is space */ {
-      if (!topIsSpace) /* origin[i-1] is not space */ {
-        res += c_space
-        topIsSpace = true
-      } /* else pass */
+    let c = origin[i]
+
+    if (inblock) {
+      if (c === c_inblock) {
+        inblock = false
+        c_inblock = ''
+        res += c
+      } else {
+        res += c
+      }
+    } else {
+      if (except.some(e => e === c)) {
+        inblock = true
+        c_inblock = c
+        res += c
+      } else {
+        if (c !== c_space) {
+          res += c
+          topIsSpace = false
+        } else if (!topIsSpace) {
+          res += c_space
+          topIsSpace = true
+        }
+      }
     }
   }
 
+  if (inblock === true) {
+    throw new Error('except not pair')
+  }
   return res
 }
 
@@ -252,11 +311,14 @@ export const rawInputParse = (i: string, seg_split: string = c_comma): Map<strin
   const kvMap = new Map<string, string>()
 
   for (const _f of frags) {
-    const f = eatRedundantSpace(_f)
-    const kv = f.split(c_space)
+    const f = eatRedundantSpace(_f, [c_single_quote])
+    const kv = splitWithEx(f, c_space, c_single_quote)
     if (kvMap.has(kv[0]))
-      throw new Error(`duplicate input, see here -> ''${_f}`)
-    kvMap.set(kv[0], kv[1])
+      throw new Error(`duplicate input, see here -> '${_f}'`)
+    if (kv.length < 2) {
+      throw new Error(`no pair value, see here -> '${_f}'`)
+    }
+    kvMap.set(kv[0], kv.slice(1).join(c_comma)) // k: "a", v: "1,2,3"
   }
   return kvMap
 }

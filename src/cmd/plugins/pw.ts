@@ -1,4 +1,4 @@
-import { nshPlugin, nshResult, nshErr, BasicStore, nshPrint, nshOk } from '../command'
+import { nshPlugin, nshResult, BasicStore, nshPrint, nshMissingInput, nshBool } from '../command'
 
 let defaultConfigPath = __dirname
 let defaultConfigFileName = 'pw.json'
@@ -12,14 +12,6 @@ enum Region {
 interface Phone {
   region: Region
   num: string
-}
-
-const getRegionCode = (region: Region) => {
-  switch (region) {
-    case Region.CN:
-      return 86
-  }
-  return -1;
 }
 
 interface QuestionAnswer {
@@ -112,7 +104,7 @@ class PWStore extends BasicStore<Account, PasswordConfig> {
 const p = new PWStore({ accounts: [], sites: [] }, defaultConfigPath, defaultConfigFileName)
 
 const nshQuery = async (q?: string): Promise<nshResult> => {
-  if (!q) return nshErr('missing input')
+  if (!q) return nshMissingInput()
   const rs = p.getElements(q)
   return nshPrint(rs)
 }
@@ -120,9 +112,9 @@ const nshQuery = async (q?: string): Promise<nshResult> => {
 // nshInsert - 
 // format: org steam, username yiran, password abc ...
 const nshInsert = async (i?: string): Promise<nshResult> => {
-  if (!i) return nshErr('missing input')
+  if (!i) return nshMissingInput()
   const res = p.insertElement(i)
-  return res ? nshOk() : nshErr('insert failed')
+  return nshBool(res, 'insert failed')
 }
 
 export const plugin: nshPlugin = {

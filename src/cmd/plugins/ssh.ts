@@ -1,5 +1,5 @@
 import { selectOne } from '../util'
-import { nshPlugin, nshResult, BasicStore, nshErr, nshSh, nshOk, nshPrint } from '../command'
+import { nshPlugin, nshResult, nshSh, nshPrint, ArrayStoreWithTopKeyEq, nshMissingInput, nshBool } from '../command'
 
 interface SSHInfo {
   tag: string
@@ -7,41 +7,10 @@ interface SSHInfo {
   user: string
 }
 
-type SSHConfig = Array<SSHInfo>
-
 let defaultStoreDir = __dirname
 let defaultStoreFile = 'ssh.json'
 
-class SSHStore extends BasicStore<SSHInfo, SSHConfig> {
-  virtualStoreProcess(store: SSHConfig, elem: SSHInfo): SSHConfig {
-    store.push(elem)
-    return store
-  }
-
-  virtualConformQuery(e: SSHInfo, k: string, v: string): boolean {
-    let stat = true
-    switch (k) {
-      case 'host':
-        if (e.host !== v) stat = false
-        break;
-      case 'user':
-        if (e.user !== v) stat = false
-        break;
-      case 'tag':
-        if (e.tag !== v) stat = false
-        break;
-      default:
-        stat = false
-        break;
-    }
-    return stat
-  }
-
-  virtualIterate(s: SSHConfig, thisIdx: number): SSHInfo | undefined {
-    if (thisIdx >= s.length) return undefined
-    return s[thisIdx]
-  }
-
+class SSHStore extends ArrayStoreWithTopKeyEq<SSHInfo> {
   virtualNewElement(m: Map<string, string>): SSHInfo | undefined {
     const e: SSHInfo = { tag: "", host: "", user: "" }
     m.forEach((v, k) => {
@@ -58,9 +27,7 @@ class SSHStore extends BasicStore<SSHInfo, SSHConfig> {
 
 const p = new SSHStore([], defaultStoreDir, defaultStoreFile)
 
-const genSSHCommand = (user: string, host: string) => {
-  return `ssh ${user}@${host}`
-}
+const genSSHCommand = (user: string, host: string) => `ssh ${user}@${host}`
 
 const nshConnect = async (): Promise<nshResult> => {
   const idx = selectOne(p.getStore().map(v => v.tag), 'select ssh target')
@@ -69,13 +36,13 @@ const nshConnect = async (): Promise<nshResult> => {
 }
 
 const nshInsert = async (i?: string): Promise<nshResult> => {
-  if (!i) return nshErr('missing input')
+  if (!i) return nshMissingInput()
   const r = p.insertElement(i)
-  return r ? nshOk() : nshErr('insert fail')
+  return nshBool(r, 'insert fail')
 }
 
 const nshQuery = async (q?: string): Promise<nshResult> => {
-  if (!q) return nshErr('missing input')
+  if (!q) return nshMissingInput()
   const r = p.getElements(q)
   return nshPrint(r)
 }

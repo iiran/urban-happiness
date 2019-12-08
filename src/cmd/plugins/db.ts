@@ -1,5 +1,5 @@
 import { selectOne } from '../util'
-import { nshPlugin, nshResult, BasicStore, nshSh, nshErr, nshPrint } from '../command'
+import { nshPlugin, nshResult, BasicStore, nshSh, nshPrint, nshMissingInput } from '../command'
 
 let showPassword = true
 let defaultStoreDir = __dirname
@@ -119,7 +119,7 @@ const nshConnect = async (): Promise<nshResult> => {
 }
 
 const nshQuery = async (q?: string): Promise<nshResult> => {
-  if (!q) return nshErr('missing input')
+  if (!q) return nshMissingInput()
   const es = p.getElements(q)
   return nshPrint(es)
 }

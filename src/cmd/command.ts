@@ -24,7 +24,7 @@ export const nshPrint = <T>(p: T): nshResult => {
   if (['string', 'number', 'boolean'].includes(typeof p)) {
     v = `${p}`
   } else {
-    v = JSON.stringify(p)
+    v = JSON.stringify(p, null, 2)
   }
   return {
     typ: nshResultType.Print,
@@ -37,6 +37,17 @@ export const nshOk = (): nshResult => {
     typ: nshResultType.Print,
     val: 'ok'
   }
+}
+
+export const nshMissingInput = (): nshResult => {
+  return {
+    typ: nshResultType.Error,
+    val: 'missing input'
+  }
+}
+
+export const nshBool = (res: any, errMsg: string): nshResult => {
+  return res ? nshOk() : nshErr(errMsg)
 }
 
 export const nshSh = (code: string): nshResult => {
@@ -82,7 +93,7 @@ export class BasicStore<Element, Store> {
   setStoreDir(p: string) {
     if (this.m_store_dir === p) return
     this.m_store_dir = p
-    this.loadStore()  // reload
+    this.loadStore()
   }
 
   constructor(empty_store: Store, store_dir: string, store_filename: string = 'store.json') {
@@ -230,6 +241,45 @@ export class BasicStore<Element, Store> {
     }
 
     return true
+  }
+}
+
+export class ArrayStore<E> extends BasicStore<E, Array<E>> {
+  virtualStoreProcess(store: Array<E>, elem: E): Array<E> {
+    store.push(elem)
+    return store
+  }
+
+  virtualIterate(s: Array<E>, thisIdx: number): E | undefined {
+    if (thisIdx >= s.length) return undefined
+    return s[thisIdx]
+  }
+}
+
+export class ArrayStoreWithTopKeyEq<E extends { [key: string]: any }> extends ArrayStore<E> {
+
+  virtualConformQuery(e: E, k: string, v: string): boolean {
+    let stat = true
+    if (!Object.keys(e).includes(k)) {
+      stat = false
+    } else if (typeof e[k] === 'string') {
+      if (e[k] !== v) stat = false
+    } else if (typeof e[k] === 'number') {
+      if (e[k] !== Number(v)) stat = false
+    } else if (Array.isArray(e[k])) {
+      const eka = e[k] as Array<any>
+      if (!eka.includes(v)) stat = false
+    } else if (typeof e[k] === 'boolean') {
+      const lowv = v.toLowerCase()
+      if (['false', 'f'].includes(lowv)) {
+        if (e[k] !== false) stat = false
+      } else if (['true', 't'].includes(lowv)) {
+        if (e[k] !== true) stat = false
+      } else /* e[k] is {} */ {
+        stat = false
+      }
+    }
+    return stat
   }
 }
 
