@@ -134,6 +134,9 @@ export const plugin: nshPlugin = {
       name: 'new account',
       desc: 'insert account into database',
       help: 'org [Organization], username [Username], password [Password] ... [identifier] [value]'
-    }, nshInsert]
+    }, nshInsert],
+    [{ name: 'update store' }, async () => {
+      return nshBool(p.updateStable(), 'update failed')
+    }]
   ])
 }

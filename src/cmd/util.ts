@@ -111,6 +111,14 @@ export const updateJSON = <T>(path: string, callback: (data: T) => T): boolean =
   return true
 }
 
+export const mergeTwoJson = <T1, T2>(readPath1: string, readPath2: string, writePath: string, callback: (data1: T1, data2: T2) => T1 & T2): boolean => {
+  let o1 = readInJSON<T1>(readPath1)
+  let o2 = readInJSON<T2>(readPath2)
+  let o = callback(o1, o2)
+  writeToJSON(writePath, o)
+  return true
+}
+
 export const deleteFileBatch = (dir: string, prefix: string) => {
   let files = fs.readdirSync(dir)
   for (const f of files) {

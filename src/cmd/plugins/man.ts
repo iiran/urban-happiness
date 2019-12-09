@@ -28,18 +28,6 @@ class ManStore extends ArrayStoreWithTopKeyEq<ManInfo> {
 
 const p = new ManStore([], defaultStoreDir, defaultStoreFile)
 
-const nshQuery = async (q?: string): Promise<nshResult> => {
-  if (!q) return nshMissingInput()
-  const r = p.getElements(q)
-  return nshPrint(r)
-}
-
-const nshInsert = async (i?: string): Promise<nshResult> => {
-  if (!i) return nshMissingInput()
-  const r = p.insertElement(i)
-  return nshBool(r, 'insertfail')
-}
-
 export const plugin: nshPlugin = {
   setStorePath: (path: string) => {
     defaultStoreDir = path
@@ -51,9 +39,23 @@ export const plugin: nshPlugin = {
   cmds: new Map([
     [{
       name: 'query'
-    }, nshQuery],
+    }, async (q?: string) => {
+      if (!q) return nshMissingInput()
+      const r = p.getElements(q)
+      return nshPrint(r)
+    }],
     [{
       name: 'insert'
-    }, nshInsert]
+    }, async (i?: string) => {
+      if (!i) return nshMissingInput()
+      const r = p.insertElement(i)
+      return nshBool(r, 'insertfail')
+    }],
+    [{
+      name: 'update db'
+    }, async () => {
+      const r = p.updateStable()
+      return nshBool(r, 'update fail')
+    }]
   ])
 }

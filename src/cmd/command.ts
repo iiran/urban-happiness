@@ -1,4 +1,4 @@
-import { readInJSON, c_dot, numHash, writeToJSON, readInJSONBatch, fileCount, mergeTwoObject, selectOne, selectOneWithArgs, deleteFileBatch, rawInputParse, c_comma, createShellScript } from "./util"
+import { readInJSON, c_dot, numHash, writeToJSON, readInJSONBatch, fileCount, mergeTwoObject, selectOne, selectOneWithArgs, deleteFileBatch, rawInputParse, c_comma, createShellScript, mergeTwoJson } from "./util"
 import * as Path from 'path'
 import * as fs from 'fs'
 
@@ -83,6 +83,8 @@ export class BasicStore<Element, Store> {
   private m_store_template: Store
   private m_store_dir: string = ''
   private m_store_filename: string = ''
+  private readonly prestable_identifier = 'new'
+  private readonly temp_identifier = 'temp'
 
   private setupSuffix(fileName: string) {
     const name_and_ext = fileName.split(c_dot)
@@ -105,16 +107,20 @@ export class BasicStore<Element, Store> {
   }
 
   private getTempFileIdentifyPrefix(): string {
-    return this.m_store_filename + c_dot + 'temp'
+    return [this.m_store_filename, this.temp_identifier].join(c_dot)
+  }
+
+  private getPreStableFileIdentifyPrefix(): string {
+    return [this.m_store_filename, this.prestable_identifier].join(c_dot)
   }
 
   private getStableFilePath(): string {
-    const statbleFileName = this.m_store_filename + c_dot + this.m_suffix
+    const statbleFileName = [this.m_store_filename, this.m_suffix].join(c_dot)
     return Path.join(this.m_store_dir, statbleFileName)
   }
 
   private getPreStableFilePath(): string {
-    const preStatbleFileName = this.m_store_filename + c_dot + 'new' + c_dot + this.m_suffix
+    const preStatbleFileName = [this.getPreStableFileIdentifyPrefix(), this.m_suffix].join(c_dot)
     return Path.join(this.m_store_dir, preStatbleFileName)
   }
 
@@ -188,6 +194,19 @@ export class BasicStore<Element, Store> {
     }
 
     return es
+  }
+
+  updateStable(): boolean {
+    const updatePreRes = this.updatePreStable()
+    if (!updatePreRes) return false
+
+    mergeTwoJson(this.getPreStableFilePath(), this.getStableFilePath(), this.getStableFilePath(), ((prestable, stable) => {
+      return mergeTwoObject(prestable, stable)
+    }))
+
+    deleteFileBatch(this.m_store_dir, this.getPreStableFileIdentifyPrefix())
+
+    return true
   }
 
   updatePreStable(): boolean {
