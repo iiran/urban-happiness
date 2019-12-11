@@ -1,5 +1,5 @@
 import { selectOne } from '../util'
-import { nshPlugin, nshResult, nshSh, nshPrint, ArrayStoreWithTopKeyEq, nshMissingInput, nshBool } from '../command'
+import { nshPlugin, nshResult, nshSh, nshPrint, ArrayStoreWithTopKeyEq, nshMissingInput, nshBool, nshInsertResult } from '../command'
 
 interface SSHInfo {
   tag: string
@@ -38,7 +38,7 @@ const nshConnect = async (): Promise<nshResult> => {
 const nshInsert = async (i?: string): Promise<nshResult> => {
   if (!i) return nshMissingInput()
   const r = p.insertElement(i)
-  return nshBool(r, 'insert fail')
+  return nshInsertResult(r)
 }
 
 const nshQuery = async (q?: string): Promise<nshResult> => {
@@ -53,18 +53,18 @@ export const plugin: nshPlugin = {
     p.setStoreDir(path)
   },
   info: {
-    name: 'ssh',
+    name: 'SSH',
   },
   cmds: new Map([
     [{
-      name: 'connect',
+      name: 'CONNECT',
     }, nshConnect],
     [{
-      name: 'insert',
+      name: 'CREATE NEW SSH INFO',
       help: 'insert help',
     }, nshInsert],
     [{
-      name: 'find',
+      name: 'QUERY SSH INFO',
       help: 'find help',
     }, nshQuery],
   ])

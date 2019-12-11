@@ -50,6 +50,12 @@ export const nshBool = (res: any, errMsg: string): nshResult => {
   return res ? nshOk() : nshErr(errMsg)
 }
 
+export const nshInsertResult = (res: any): nshResult => {
+  return res ? nshOk() : nshErr('insert failed')
+}
+
+export const nshUpdateResult = (res: any): nshResult => res ? nshOk() : nshErr('update failed')
+
 export const nshSh = (code: string): nshResult => {
   return {
     typ: nshResultType.Shell,
@@ -201,12 +207,19 @@ export class BasicStore<Element, Store> {
     if (!updatePreRes) return false
 
     mergeTwoJson(this.getPreStableFilePath(), this.getStableFilePath(), this.getStableFilePath(), ((prestable, stable) => {
-      return mergeTwoObject(prestable, stable)
+      const afterMerge = mergeTwoObject(prestable, stable)
+      const final = this.virtualUpdateStableProcess(afterMerge)
+      return final
     }))
 
     deleteFileBatch(this.m_store_dir, this.getPreStableFileIdentifyPrefix())
 
     return true
+  }
+
+  // compress?
+  virtualUpdateStableProcess(beforeStable: Store): Store {
+    return beforeStable
   }
 
   updatePreStable(): boolean {
@@ -324,8 +337,9 @@ export class Nsh implements nshManager {
   }
 
   selectCommand(): Nsh {
+    process.stdout.write(`\n`)
     if (this.m_plugins.length == 0) return this
-    this.m_curr = selectOne(this.m_plugins.map(p => p.info.name), 'select command: ')
+    this.m_curr = selectOne(this.m_plugins.map(p => p.info.name), `⌨️ Select Command:_\b`)
     return this
   }
 
@@ -333,7 +347,10 @@ export class Nsh implements nshManager {
     let ops = []
     for (const k of this.m_plugins[this.m_curr].cmds.keys()) ops.push(k)
 
-    const [opIdx, args] = selectOneWithArgs(ops.map(o => o.name), 'select operation: ')
+    process.stdout.write(`\n`)
+
+    const [opIdx, args] = selectOneWithArgs(ops.map(o => `${o.name} ${o.desc ? `(${o.desc})` : ``} ${o.help ? `🔍 ${o.help}` : ``}`), `⌨️ Select Operation:_\b`)
+
     const f = this.m_plugins[this.m_curr].cmds.get(ops[opIdx])
 
     const res = f ? await f(args) : await cmdNotFoundFunc()

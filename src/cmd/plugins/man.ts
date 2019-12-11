@@ -1,4 +1,4 @@
-import { ArrayStoreWithTopKeyEq, nshResult, nshPrint, nshPlugin, nshBool, nshMissingInput } from '../command'
+import { ArrayStoreWithTopKeyEq, nshPrint, nshPlugin, nshMissingInput, nshInsertResult, nshUpdateResult } from '../command'
 import { c_comma } from '../util'
 
 interface ManInfo {
@@ -34,28 +34,28 @@ export const plugin: nshPlugin = {
     p.setStoreDir(path)
   },
   info: {
-    name: 'man'
+    name: 'MANUAL'
   },
   cmds: new Map([
     [{
-      name: 'query'
+      name: 'QUERY MANUAL'
     }, async (q?: string) => {
       if (!q) return nshMissingInput()
       const r = p.getElements(q)
       return nshPrint(r)
     }],
     [{
-      name: 'insert'
+      name: 'INSERT MANUAL'
     }, async (i?: string) => {
       if (!i) return nshMissingInput()
       const r = p.insertElement(i)
-      return nshBool(r, 'insertfail')
+      return nshInsertResult(r)
     }],
     [{
-      name: 'update db'
+      name: 'UPDATE MANUAL STOREAGE'
     }, async () => {
       const r = p.updateStable()
-      return nshBool(r, 'update fail')
+      return nshUpdateResult(r)
     }]
   ])
 }

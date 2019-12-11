@@ -1,12 +1,12 @@
-import { nshPlugin, nshResult, BasicStore, nshPrint, nshMissingInput, nshBool } from '../command'
+import { nshPlugin, nshResult, BasicStore, nshPrint, nshMissingInput, nshInsertResult, nshUpdateResult } from '../command'
 
 let defaultConfigPath = __dirname
 let defaultConfigFileName = 'pw.json'
 
 enum Region {
-  CN,
-  JP,
-  US,
+  CN = 86,
+  JP = 81,
+  US = 1,
 }
 
 interface Phone {
@@ -88,7 +88,8 @@ class PWStore extends BasicStore<Account, PasswordConfig> {
       else if (k === 'password') { e.password = v }
       else if (k === 'tag') { e.tag = v }
       else if (k === 'id' || k === 'ID') { e.ID = v }
-      else if (k === 'phone') { e.phone = { region: 0, num: v } }
+      else if (k === 'phone') { e.phone = { region: Region.CN, num: v } }
+      else if (k === 'email') { e.email = v }
       else {
         if (!e.extra) e.extra = []
         e.extra.push({ k: k, v: v })
@@ -114,7 +115,7 @@ const nshQuery = async (q?: string): Promise<nshResult> => {
 const nshInsert = async (i?: string): Promise<nshResult> => {
   if (!i) return nshMissingInput()
   const res = p.insertElement(i)
-  return nshBool(res, 'insert failed')
+  return nshInsertResult(res)
 }
 
 export const plugin: nshPlugin = {
@@ -123,20 +124,20 @@ export const plugin: nshPlugin = {
     p.setStoreDir(path)
   },
   info: {
-    name: 'password manager',
+    name: 'ACCOUNT',
   },
   cmds: new Map([
     [{
-      name: 'query',
+      name: 'QUERY ACCOUNT',
       desc: 'get account from database',
     }, nshQuery],
     [{
-      name: 'new account',
+      name: 'CREATE NEW ACCOUNT',
       desc: 'insert account into database',
       help: 'org [Organization], username [Username], password [Password] ... [identifier] [value]'
     }, nshInsert],
-    [{ name: 'update store' }, async () => {
-      return nshBool(p.updateStable(), 'update failed')
+    [{ name: 'UPDATE ACCOUNT STORAGE' }, async () => {
+      return nshUpdateResult(p.updateStable())
     }]
   ])
 }

@@ -130,14 +130,14 @@ export const plugin: nshPlugin = {
     p.setStoreDir(path)
   },
   info: {
-    name: 'db',
+    name: 'DATABASE',
   },
   cmds: new Map([
     [{
-      name: 'connect',
+      name: 'CONNECT VIA SQL CLIENT',
     }, nshConnect],
     [{
-      name: 'query'
+      name: 'QUERY DB INFO'
     }, nshQuery]
   ])
 }
