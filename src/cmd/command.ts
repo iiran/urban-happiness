@@ -82,6 +82,13 @@ export interface nshPlugin {
   setStorePath(dir: string): void
 }
 
+enum TimestampEnableType {
+  N,
+  C,
+  CU,
+  CUD,
+}
+
 export class BasicStore<Element, Store> {
   private m_suffix: string = 'json'
   private m_store?: Store
@@ -91,6 +98,7 @@ export class BasicStore<Element, Store> {
   private m_store_filename: string = ''
   private readonly prestable_identifier = 'new'
   private readonly temp_identifier = 'temp'
+  private readonly ts_enable: TimestampEnableType = TimestampEnableType.N
 
   private setupSuffix(fileName: string) {
     const name_and_ext = fileName.split(c_dot)
@@ -170,9 +178,8 @@ export class BasicStore<Element, Store> {
   getElements(q: string): Element[] {
     let i = 0
     let es: Element[] = []
-    let m: Map<string, string>
     try {
-      m = rawInputParse(q)
+      let m = rawInputParse(q)
     } catch (e) {
       return []
     }
